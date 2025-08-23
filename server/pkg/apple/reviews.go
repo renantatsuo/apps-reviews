@@ -64,7 +64,7 @@ func getAppleRSSURL(appID string) string {
 func (c *AppleClient) GetLatestReviews(appID string) (Response[Review], error) {
 	url := getAppleRSSURL(appID)
 
-	response, err := http.Get(url)
+	response, err := c.httpClient.Get(url)
 	if err != nil {
 		return Response[Review]{}, err
 	}

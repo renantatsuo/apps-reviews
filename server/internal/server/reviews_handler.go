@@ -9,6 +9,10 @@ import (
 	"github.com/renantatsuo/app-review/server/pkg/apple"
 )
 
+// reviewsHandler is the handler for the /reviews/{appID} endpoint.
+// It returns the reviews for the given appID.
+// TODO: support pagination.
+// TODO: support live fetch if the appID is not found in the store.
 func (s *server) reviewsHandler(w http.ResponseWriter, r *http.Request) {
 	type response struct {
 		Data []models.Review `json:"data"`

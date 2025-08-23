@@ -6,12 +6,13 @@ import (
 )
 
 // StartPolling starts the polling process.
+// TODO: this is currently not concurrent safe.
 func (c *ReviewsClient) StartPolling(ctx context.Context) {
 	c.logger.Info("starting polling", "pollingInterval", c.pollingInterval)
 
 	c.initialize()
 
-	ticker := time.Tick(0)
+	ticker := time.Tick(c.pollingInterval)
 	go func() {
 		for {
 			select {
