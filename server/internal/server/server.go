@@ -26,7 +26,7 @@ func New(port int, logger *slog.Logger, reviewsClient *reviews.ReviewsClient) *s
 
 func (s *server) Start() error {
 	router := http.NewServeMux()
-	router.Handle("GET /reviews/{appID}", http.HandlerFunc(s.reviewsHandler))
+	router.Handle("GET /reviews/{appID}", corsMiddleware(s.reviewsHandler))
 
 	s.server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", s.port),
