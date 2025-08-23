@@ -126,6 +126,8 @@ func (r *Response[Review]) Next() (Response[Review], error) {
 		return Response[Review]{}, err
 	}
 
+	nextPageResponse.httpClient = r.httpClient
+
 	return nextPageResponse, nil
 }
 
