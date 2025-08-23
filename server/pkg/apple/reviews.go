@@ -19,6 +19,7 @@ type Response[T any] struct {
 		Entry []T          `json:"entry"`
 		Link  []ReviewLink `json:"link"`
 	} `json:"feed"`
+	httpClient *http.Client `json:"-"`
 }
 
 type Review struct {
@@ -75,6 +76,8 @@ func (c *AppleClient) GetLatestReviews(appID string) (Response[Review], error) {
 		return Response[Review]{}, err
 	}
 
+	reviewsResponse.httpClient = c.httpClient
+
 	return reviewsResponse, nil
 }
 
@@ -112,7 +115,7 @@ func (r *Response[Review]) Next() (Response[Review], error) {
 		return Response[Review]{}, ErrNoNextPage
 	}
 
-	response, err := http.Get(nextPageURL)
+	response, err := r.httpClient.Get(nextPageURL)
 	if err != nil {
 		return Response[Review]{}, err
 	}
