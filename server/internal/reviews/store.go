@@ -58,3 +58,13 @@ func (c *ReviewsClient) SaveReviews(appID string, reviews []apple.Review) error 
 
 	return nil
 }
+
+// GetReviews gets the reviews for a given app ID.
+func (c *ReviewsClient) GetReviews(appID string) ([]apple.Review, error) {
+	reviews, err := store.Get[[]apple.Review](ReviewsPrefix+appID, c.store)
+	if err != nil {
+		return nil, err
+	}
+
+	return reviews, nil
+}
