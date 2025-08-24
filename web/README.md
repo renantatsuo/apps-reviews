@@ -7,7 +7,9 @@ Built on top of Vite powered with typescript and react-query.
 The application follows a clean, component-based architecture with clear separation of concerns:
 
 **Application (`src/App.tsx`)**
+
 **Components (`src/components/`)**
+
 **Library code (`src/lib/`)**
 
 ## Features
