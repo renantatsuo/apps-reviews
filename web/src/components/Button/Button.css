@@ -1,0 +1,35 @@
+.button {
+  padding: 0.5rem 1rem;
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.button:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button--primary {
+  background: var(--apple-blue);
+}
+
+.button--link {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-decoration: underline;
+  font-size: inherit;
+  padding: 0.5rem 0;
+}

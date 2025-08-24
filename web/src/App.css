@@ -1,0 +1,143 @@
+.app {
+  min-height: 100vh;
+}
+
+:root {
+  --apple-blue: #007aff;
+  --primary-color: var(--apple-blue);
+  --error-color: #ff6467;
+  --error-bg: #ffebee;
+  --warning-color: #ff9500;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --border-color: #d2d2d7;
+  --border-radius: 8px;
+}
+
+.reviews-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  line-height: 1.5;
+}
+
+.search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--apple-blue), var(--warning-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.search__form {
+  width: 100%;
+}
+
+.input-group {
+  display: flex;
+  gap: 1rem;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+.message-container {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* Reviews  */
+.reviews {
+  margin-top: 3rem;
+}
+
+.reviews__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.reviews__header h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.reviews__subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.reviews__no-reviews {
+  text-align: center;
+  padding: 3rem;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.reviews__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .reviews-container {
+    padding: 1rem;
+  }
+
+  .search h1 {
+    font-size: 2rem;
+  }
+
+  .input-group {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .reviews__list {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .reviews-container {
+    padding: 0.5rem;
+  }
+
+  .search-section h1 {
+    font-size: 1.75rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #f5f5f7;
+    --text-secondary: #86868b;
+    --bg-primary: #1d1d1f;
+    --bg-secondary: #2c2c2e;
+    --border-color: #38383a;
+    --error-bg: #2d1b1b;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+}
