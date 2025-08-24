@@ -1,9 +1,11 @@
 package store
 
 import (
-	"fmt"
+	"errors"
 	"sync"
 )
+
+var ErrKeyNotFound = errors.New("key not found")
 
 type Store struct {
 	mu    sync.RWMutex
@@ -23,7 +25,7 @@ func Get[T any](key string, s *Store) (T, error) {
 
 	values, ok := s.store[key]
 	if !ok {
-		return *new(T), fmt.Errorf("key %s not found", key)
+		return *new(T), ErrKeyNotFound
 	}
 
 	return values.(T), nil

@@ -2,10 +2,13 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
+	"sort"
 
 	"github.com/renantatsuo/app-review/server/internal/models"
+	"github.com/renantatsuo/app-review/server/internal/store"
 	"github.com/renantatsuo/app-review/server/pkg/apple"
 )
 
@@ -22,6 +25,11 @@ func (s *server) reviewsHandler(w http.ResponseWriter, r *http.Request) {
 
 	reviews, err := s.reviewsClient.GetReviews(appID)
 	if err != nil {
+		if errors.Is(err, store.ErrKeyNotFound) {
+			s.logger.Error("key not found", "appID", appID)
+			http.Error(w, "key not found", http.StatusNotFound)
+			return
+		}
 		s.logger.Error("error getting reviews", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -34,6 +42,11 @@ func (s *server) reviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reviewsModel := transformReviewsModel(reviews, s.logger)
+
+	// ensure the reviews are sorted by latest to oldest
+	sort.Slice(reviewsModel, func(i, j int) bool {
+		return reviewsModel[i].Updated.After(reviewsModel[j].Updated)
+	})
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response{
