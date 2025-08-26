@@ -1,19 +1,36 @@
 # Apps Reviews
 
-The system continuously polls the Apple App Store for new reviews of configured apps and provides a web interface to search and view them.
+A microservices-based system that continuously monitors the Apple App Store for new reviews of configured apps and provides a web interface to search and view them.
 
-## Project Structure
+## Architecture Overview
 
-More information can be found on [web/README.md](web/README.md) and [server/README.md](server/README.md)
+The system follows a **microservices architecture** with three main services that communicate through a persistent queue:
 
-## Features
+```mermaid
+graph TB
+    App --> API[server api]
 
-- **Continuous Polling**: Automatically fetches new reviews at configurable intervals (default: 30 seconds)
-- **Time-based Filtering**: Only stores and displays reviews from the last 48 hours (configurable)
-- **Multi-app Support** \*: Monitor multiple Apple App Store apps simultaneously (for now only accepts app ids from service configuration)
-- **REST API**: HTTP API for accessing review data
-- **Web App**: React UI for searching and viewing reviews
-- **Persistent Storage**: Local file-based storage for review data
+    subgraph "server"
+        API --> DB[(Apps/Reviews Database)]
+        API --> DB
+
+        scheduler --> queue[(SQLite queue)]
+        queue --> consumer
+        consumer --> Apple
+        consumer --> DB
+
+        scheduler --> DB
+        Apple --> consumer
+    end
+```
+
+### Services
+
+- **Server** (`cmd/server`): HTTP API server providing REST endpoints for the web app
+- **Scheduler** (`cmd/scheduler`): Periodically schedules app review fetching by adding app IDs to the queue
+- **Consumer** (`cmd/consumer`): Processes queued app IDs and fetches new reviews from Apple's API
+
+More detailed information can be found in [web/README.md](web/README.md) and [server/README.md](server/README.md)
 
 ## Quick Start
 
@@ -22,38 +39,44 @@ More information can be found on [web/README.md](web/README.md) and [server/READ
 - Go 1.24.2+
 - Node.js 18+
 - npm
+- [goose](https://github.com/pressly/goose) (for database migrations)
 
 ### Installation
 
 ```bash
+# Install dependencies and run database migrations
 make init
 ```
 
 ### Running
 
 ```bash
-# Start both server and web interface
+# Start all services and web interface
 make dev
 
-# Or start them separately:
-make dev-server  # Go server on :8080
-make dev-web     # React dev server on :5173
+# Or start them separately in different terminals:
+make dev-server     # HTTP API server on :8080
+make dev-scheduler  # Scheduler service
+make dev-consumer   # Consumer service
+make dev-web        # React dev server on :5173
 ```
+
+**Note**: All three backend services (server, scheduler, consumer) need to be running for the system to work properly.
 
 ### Example Usage
 
 ```bash
-# Configure app IDs to monitor
-export APP_IDS="389801252,1234567890"
-
-# Set polling interval to 1 minute
+# Set polling interval to 1 minute (optional)
 export POLLING_INTERVAL="1m"
 
-# Start the server
-make dev-server
+# Start all services
+make dev
 ```
 
-Then visit `http://localhost:5173` to search for reviews by App ID.
+Then visit `http://localhost:5173` to:
+
+1. Add new apps by App ID using the web interface
+2. Search and view reviews for monitored apps
 
 ## API Reference
 
@@ -61,7 +84,37 @@ Then visit `http://localhost:5173` to search for reviews by App ID.
 
 Fetch reviews for a specific Apple App Store app ID.
 
+### GET /api/apps
+
+Fetch all monitored apps.
+
 **Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "1458862350",
+      "name": "Hevy - Workout Tracker Gym Log",
+      "thumbnail_url": "https://...",
+      "created_at": "2024-01-01T12:00:00Z",
+      "updated_at": "2024-01-01T12:00:00Z"
+    }
+  ]
+}
+```
+
+### POST /api/apps/{appID}
+
+Add a new app to monitor by Apple App Store ID.
+
+**Response:**
+
+```json
+"1458862350"
+```
+
+### Reviews Response Format
 
 ```json
 {
@@ -84,16 +137,34 @@ Fetch reviews for a specific Apple App Store app ID.
 **Status Codes:**
 
 - `200` - Success
+- `201` - Created (for POST requests)
+- `400` - Bad request (invalid app ID)
 - `404` - App not found or no reviews available
 - `500` - Internal server error
+
+## System Requirements
+
+### Database Migrations
+
+The system uses `goose` for database migrations. Migrations are automatically run during `make init`.
+
+Manual migration commands:
+
+```bash
+make migrate-up    # Run pending migrations
+make migrate-down  # Rollback last migration
+```
+
+### Data Storage
+
+- **SQLite Database**: `server/data/database.db` - Apps and reviews storage
+- **Queue Database**: `server/data/queue.db` - Job queue for async processing
 
 ## TODO
 
 ### Missing Features & Improvements
 
-- [ ] **Concurrency Safety** - for now the polling engine do not support multiple instances
 - [ ] **Testing**
-- [ ] **API**
-
-  - [ ] Pagination support for larger apps
-  - [ ] Live fetch for new app IDs (on-demand add new apps)
+- [ ] **API Improvements**:
+  - [ ] Pagination support for reviews endpoint
+  - [ ] App deletion endpoint

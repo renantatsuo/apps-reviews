@@ -1,58 +1,140 @@
-# app-review server
+# Apps Reviews Server
 
-A built with go HTTP server to provide an API for retrieving Apple App Store reviews.
+A microservices-based backend system built with Go that provides REST APIs for monitoring Apple App Store reviews.
 
 ## Architecture
 
-The server follows a clean, layered architecture with clear separation of concerns:
+The backend follows a **microservices architecture** with three separate services that work together:
 
-**Application Layer (`cmd/server/`)**
+### Services Overview
 
-- Entry point with dependency injection and graceful shutdown handling
-- Configures logging, environment variables, and starts background services
+```mermaid
+graph TB
+    subgraph "Services"
+        Queue[(queue)]
+        Database[(database)]
+        Consumer[consumer]
+        Scheduler[scheduler]
+        server
+    end
 
-**HTTP Layer (`internal/server/`)**
+    subgraph "External"
+        Apple[Apple API]
+    end
+
+    server --> Queue
+    server <--> Database
+
+    Scheduler --> Database
+    Scheduler --> Queue
+
+    Queue --> Consumer
+    Consumer <--> Apple
+    Consumer --> Database
+```
+
+### 1. Server Service (`cmd/server/`)
+
+**HTTP API Layer**
 
 - RESTful API server with route handling
 - CORS middleware for cross-origin requests
 - Request/response transformation and error handling
 
-**Business Logic Layer (`internal/reviews/`)**
+**Endpoints:**
 
-- Reviews client that orchestrates Apple API integration
-- Background polling service that fetches new reviews periodically
-- Data persistence layer that manages file storage and in-memory caching
+- `GET /reviews/{appID}` - Fetch reviews for a specific app
+- `GET /apps` - List all apps
+- `POST /apps/{appID}` - Add a new app to monitor
 
-**Data Layer (`internal/models/`, `internal/store/`)**
+### 2. Scheduler Service (`cmd/scheduler/`)
+
+**Job Scheduling Layer**
+
+- Periodically queries the apps database for apps
+- Adds app IDs to the processing queue at configurable intervals
+
+### 3. Consumer Service (`cmd/consumer/`)
+
+**Background Processing Layer**
+
+- Processes app IDs from the queue
+- Fetches new reviews from Apple's RSS feeds
+- Stores new reviews in the database
+- Handles incremental fetching to avoid duplicates
+
+### Shared Components
+
+**Data Layer (`internal/models/`, `internal/db/`)**
 
 - Domain models with transformation logic between Apple API and internal formats
-- Thread-safe in-memory store for fast access
-- File-based persistence for data durability
+- SQLite database with proper migrations
+- Structured storage for apps and reviews
+
+**Queue System (`internal/queue/`)**
+
+- Persistent SQLite-based queue using `gopq`
+- Enables asynchronous communication between services
+- Ensures reliable job processing
 
 **External Integration (`pkg/apple/`)**
 
-- Apple App Store RSS feed client
-- Data structures and parsing logic for Apple's review format
+- Apple App Store RSS feed and search API clients
+- Data structures and parsing logic for Apple's formats
 
-## Running the Server
+## Running the Services
 
-Run the server directly with Go:
+### All Services (Recommended)
+
+Use the Makefile to start all services:
 
 ```bash
-go run ./cmd/server/...
+# From the project root
+make dev
 ```
 
-The server will start on port 8080 by default and begin polling Apple's RSS feeds for the configured app IDs.
+This starts all three services plus the web interface.
+
+### Individual Services
+
+Run each service separately for development:
+
+```bash
+# Server (HTTP API)
+go run ./cmd/server
+
+# Scheduler (Job scheduling)
+go run ./cmd/scheduler
+
+# Consumer (Background processing)
+go run ./cmd/consumer
+```
+
+**Important**: All three services need to be running for the system to function properly:
+
+- **Server**: Handles web requests and provides APIs
+- **Scheduler**: Adds app IDs to the queue for processing
+- **Consumer**: Fetches new reviews from Apple
+
+### Database Setup
+
+Before running services, ensure the database is migrated:
+
+```bash
+make migrate-up
+```
 
 ## API Endpoints
 
-### Get Reviews
+### Reviews
+
+#### Get Reviews for App
 
 ```
 GET /reviews/{appID}
 ```
 
-Returns reviews for the specified Apple App ID.
+Returns recent reviews for the specified Apple App ID.
 
 **Response:**
 
@@ -74,27 +156,70 @@ Returns reviews for the specified Apple App ID.
 }
 ```
 
-## Features
+### Apps Management
 
-- **Background Polling**: Automatically fetches new reviews from Apple's RSS feeds at configured intervals
-- **Data Persistence**: Reviews are cached both in-memory for fast access and on disk for durability
-- **Graceful Shutdown**: Server handles SIGINT/SIGTERM signals for clean shutdown
-- **CORS Support**: Cross-origin requests are supported for web applications
+#### Get All Apps
+
+```
+GET /apps
+```
+
+Returns all currently monitored apps.
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "1458862350",
+      "name": "Hevy - Workout Tracker Gym Log",
+      "thumbnail_url": "https://...",
+      "created_at": "2024-01-01T12:00:00Z",
+      "updated_at": "2024-01-01T12:00:00Z"
+    }
+  ]
+}
+```
+
+#### Add New App
+
+```
+POST /apps/{appID}
+```
+
+Adds a new app to the monitoring system. The app data is automatically fetched from Apple's API.
+
+**Response:**
+
+```json
+"1458862350"
+```
+
+**Status Codes:**
+
+- `201` - App successfully added
+- `400` - Invalid app ID format
+- `500` - Error fetching app data or saving to database
 
 ## Configuration
 
-The server can be configured using environment variables:
+All services can be configured using environment variables:
 
 ### Environment Variables
 
-| Variable             | Description                                      | Default                | Example                       |
-| -------------------- | ------------------------------------------------ | ---------------------- | ----------------------------- |
-| `PORT`               | The port number on which the server will listen  | `8080`                 | `PORT=3000`                   |
-| `LOG_LEVEL`          | The logging level for the application            | `debug`                | `LOG_LEVEL=info`              |
-| `APP_IDS`            | Comma-separated list of Apple App IDs to monitor | `1458862350,389801252` | `APP_IDS=123456789,987654321` |
-| `STORE_DIR`          | Directory path for storing cached review data    | `data`                 | `STORE_DIR=/tmp/reviews`      |
-| `REVIEWS_TIME_LIMIT` | How far back to fetch reviews from Apple         | `48h`                  | `REVIEWS_TIME_LIMIT=72h`      |
-| `POLLING_INTERVAL`   | How often to poll Apple for new reviews          | `30s`                  | `POLLING_INTERVAL=5m`         |
+| Variable             | Description                              | Default | Example                  | Used By      |
+| -------------------- | ---------------------------------------- | ------- | ------------------------ | ------------ |
+| `PORT`               | HTTP server port                         | `8080`  | `PORT=3000`              | Server       |
+| `LOG_LEVEL`          | Logging level for all services           | `debug` | `LOG_LEVEL=info`         | All services |
+| `REVIEWS_TIME_LIMIT` | How far back to fetch reviews from Apple | `48h`   | `REVIEWS_TIME_LIMIT=72h` | Consumer     |
+| `POLLING_INTERVAL`   | How often scheduler adds apps to queue   | `30s`   | `POLLING_INTERVAL=5m`    | Scheduler    |
+
+### Database Configuration
+
+- **Database File**: `data/database.db` (SQLite)
+- **Queue File**: `data/queue.db` (SQLite)
+- **Migrations**: `migrations/` directory
 
 #### Log Levels
 
@@ -106,3 +231,18 @@ Available log levels:
 | `info`  | General information messages | Normal operation monitoring                |
 | `warn`  | Warning messages             | Potential issues that don't stop operation |
 | `error` | Error messages               | Errors that affect functionality           |
+
+## Database Migrations
+
+Use [goose](https://github.com/pressly/goose) for schema changes:
+
+```bash
+# Create new migration
+goose -dir migrations create migration_name sql
+
+# Run migrations
+make migrate-up
+
+# Rollback
+make migrate-down
+```
