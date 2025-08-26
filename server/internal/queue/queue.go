@@ -4,10 +4,6 @@ import (
 	"github.com/mattdeak/gopq"
 )
 
-const (
-	queueFile = "data/queue.db"
-)
-
 // Queue is the interface for the queue
 type Queue interface {
 	// Enqueue an item to the queue
@@ -22,14 +18,14 @@ type queue struct {
 	queue *gopq.Queue
 }
 
-func New() Queue {
+func New(connStr string) Queue {
 	return &queue{
-		queue: connect(),
+		queue: connect(connStr),
 	}
 }
 
-func connect() *gopq.Queue {
-	queue, err := gopq.NewSimpleQueue(queueFile)
+func connect(connStr string) *gopq.Queue {
+	queue, err := gopq.NewSimpleQueue(connStr)
 	if err != nil {
 		panic(err)
 	}

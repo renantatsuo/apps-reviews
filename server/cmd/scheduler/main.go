@@ -26,10 +26,10 @@ func main() {
 		Level: config.LogLevel,
 	})).With(slog.String("service", "scheduler"))
 
-	db := db.Connect()
+	db := db.New(config.DatabaseConnStr).Connect()
 	appleClient := apple.New()
 	appsClient := apps.New(db, appleClient)
-	queue := queue.New()
+	queue := queue.New(config.QueueConnStr)
 
 	s := scheduler.New(l, appsClient, queue, config)
 

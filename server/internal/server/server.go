@@ -8,6 +8,7 @@ import (
 
 	"github.com/renantatsuo/app-review/server/internal/apps"
 	"github.com/renantatsuo/app-review/server/internal/config"
+	"github.com/renantatsuo/app-review/server/internal/queue"
 	"github.com/renantatsuo/app-review/server/internal/reviews"
 )
 
@@ -17,6 +18,7 @@ type server struct {
 	server        *http.Server
 	reviewsClient *reviews.ReviewsClient
 	appsClient    *apps.AppsClient
+	queue         queue.Queue
 	config        config.Config
 }
 
@@ -24,12 +26,13 @@ type ResponseData[T any] struct {
 	Data T `json:"data"`
 }
 
-func New(port int, logger *slog.Logger, reviewsClient *reviews.ReviewsClient, appsClient *apps.AppsClient, config config.Config) *server {
+func New(port int, logger *slog.Logger, reviewsClient *reviews.ReviewsClient, appsClient *apps.AppsClient, queue queue.Queue, config config.Config) *server {
 	return &server{
 		port:          port,
 		logger:        logger,
 		reviewsClient: reviewsClient,
 		appsClient:    appsClient,
+		queue:         queue,
 		config:        config,
 	}
 }

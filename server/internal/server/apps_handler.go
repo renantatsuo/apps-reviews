@@ -49,6 +49,13 @@ func (s *server) postAppsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = s.queue.Enqueue([]byte(appID))
+	if err != nil {
+		s.logger.Error("error enqueuing appID", "error", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(appID)
 }

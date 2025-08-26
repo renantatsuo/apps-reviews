@@ -15,6 +15,8 @@ type Config struct {
 	AppIDs           []string
 	ReviewsTimeLimit time.Duration
 	PollingInterval  time.Duration
+	DatabaseConnStr  string
+	QueueConnStr     string
 }
 
 // LoadConfigFromEnv loads the config from the environment variables.
@@ -27,6 +29,8 @@ func LoadConfigFromEnv() (Config, error) {
 	storeDir := envv.Get("STORE_DIR").String().Default("data").Parse()
 	reviewsTimeLimit := envv.Get("REVIEWS_TIME_LIMIT").Duration().Default(48 * time.Hour).Parse()
 	pollingInterval := envv.Get("POLLING_INTERVAL").Duration().Default(30 * time.Second).Parse()
+	databaseConnStr := envv.Get("DATABASE_CONN_STR").String().Default("data/database.db").Parse()
+	queueConnStr := envv.Get("QUEUE_CONN_STR").String().Default("data/queue.db").Parse()
 
 	logLevel, err := parseLogLevel(logLevelStr)
 	if err != nil {
@@ -40,6 +44,8 @@ func LoadConfigFromEnv() (Config, error) {
 		AppIDs:           appleAppIDs,
 		ReviewsTimeLimit: reviewsTimeLimit,
 		PollingInterval:  pollingInterval,
+		DatabaseConnStr:  databaseConnStr,
+		QueueConnStr:     queueConnStr,
 	}, nil
 }
 

@@ -28,9 +28,9 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	queue := queue.New()
+	queue := queue.New(config.QueueConnStr)
 	appleClient := apple.New()
-	db := db.Connect()
+	db := db.New(config.DatabaseConnStr).Connect()
 	reviewsClient := reviews.New(l, appleClient, db, config)
 	consumer := consumer.New(l, queue, config, reviewsClient)
 	consumer.Start(ctx)
