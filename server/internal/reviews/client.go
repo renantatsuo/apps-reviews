@@ -1,32 +1,26 @@
 package reviews
 
 import (
+	"database/sql"
 	"log/slog"
-	"time"
 
-	"github.com/renantatsuo/app-review/server/internal/store"
+	"github.com/renantatsuo/app-review/server/internal/config"
 	"github.com/renantatsuo/app-review/server/pkg/apple"
 )
 
 // ReviewsClient is the client for the reviews.
 type ReviewsClient struct {
-	logger           *slog.Logger
-	store            *store.Store
-	apple            *apple.AppleClient
-	pollingInterval  time.Duration // The interval for polling the reviews.
-	reviewsTimeLimit time.Duration // The time limit to go back in time to fetch the reviews.
-	storePath        string        // The directory for the store persistence.
-	appleAppIDs      []string      // The list of apple apps.
+	logger *slog.Logger
+	apple  *apple.AppleClient
+	db     *sql.DB
+	config config.Config
 }
 
-func New(logger *slog.Logger, store *store.Store, apple *apple.AppleClient, pollingInterval time.Duration, reviewsTimeLimit time.Duration, storeDir string, appleAppIDs []string) *ReviewsClient {
+func New(logger *slog.Logger, apple *apple.AppleClient, db *sql.DB, config config.Config) *ReviewsClient {
 	return &ReviewsClient{
-		logger:           logger,
-		store:            store,
-		apple:            apple,
-		pollingInterval:  pollingInterval,
-		reviewsTimeLimit: reviewsTimeLimit,
-		storePath:        storeDir,
-		appleAppIDs:      appleAppIDs,
+		logger: logger,
+		apple:  apple,
+		db:     db,
+		config: config,
 	}
 }

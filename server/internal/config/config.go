@@ -18,7 +18,7 @@ type Config struct {
 }
 
 // LoadConfigFromEnv loads the config from the environment variables.
-func LoadConfigFromEnv() (*Config, error) {
+func LoadConfigFromEnv() (Config, error) {
 	port := envv.Get("PORT").Int().Default(8080).Parse()
 	logLevelStr := envv.Get("LOG_LEVEL").String().Default("debug").Parse()
 	// defaults to hevy and instagram
@@ -30,10 +30,10 @@ func LoadConfigFromEnv() (*Config, error) {
 
 	logLevel, err := parseLogLevel(logLevelStr)
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
-	return &Config{
+	return Config{
 		LogLevel:         logLevel,
 		Port:             port,
 		StoreDir:         storeDir,

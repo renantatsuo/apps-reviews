@@ -7,9 +7,9 @@ import (
 	"github.com/renantatsuo/app-review/server/pkg/apple"
 )
 
-// getLatestReviewsFromApple fetches the latest reviews for a given app ID.
+// GetLatestReviewsFromApple fetches the latest reviews for a given app ID.
 // It returns a slice of reviews that were updated after the since time.
-func (c *ReviewsClient) getLatestReviewsFromApple(appID string, since time.Time) (res []apple.Review, err error) {
+func (c *ReviewsClient) GetLatestReviewsFromApple(appID string, since time.Time) (res []apple.Review, err error) {
 	reviews, err := c.apple.GetLatestReviews(appID)
 	if err != nil {
 		return nil, err

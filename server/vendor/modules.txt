@@ -1,3 +1,10 @@
+# github.com/mattdeak/gopq v0.2.1
+## explicit; go 1.22.5
+github.com/mattdeak/gopq
+github.com/mattdeak/gopq/internal
+# github.com/mattn/go-sqlite3 v1.14.22
+## explicit; go 1.19
+github.com/mattn/go-sqlite3
 # github.com/renantatsuo/envv v0.3.0
 ## explicit; go 1.24.2
 github.com/renantatsuo/envv

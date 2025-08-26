@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/renantatsuo/app-review/server/internal/apps"
+	"github.com/renantatsuo/app-review/server/internal/config"
 	"github.com/renantatsuo/app-review/server/internal/reviews"
 )
 
@@ -14,19 +16,29 @@ type server struct {
 	logger        *slog.Logger
 	server        *http.Server
 	reviewsClient *reviews.ReviewsClient
+	appsClient    *apps.AppsClient
+	config        config.Config
 }
 
-func New(port int, logger *slog.Logger, reviewsClient *reviews.ReviewsClient) *server {
+type ResponseData[T any] struct {
+	Data T `json:"data"`
+}
+
+func New(port int, logger *slog.Logger, reviewsClient *reviews.ReviewsClient, appsClient *apps.AppsClient, config config.Config) *server {
 	return &server{
 		port:          port,
 		logger:        logger,
 		reviewsClient: reviewsClient,
+		appsClient:    appsClient,
+		config:        config,
 	}
 }
 
 func (s *server) Start() error {
 	router := http.NewServeMux()
-	router.Handle("GET /reviews/{appID}", corsMiddleware(s.reviewsHandler))
+	router.Handle("GET /reviews/{appID}", corsMiddleware(s.getReviewsHandler))
+	router.Handle("GET /apps", corsMiddleware(s.getAppsHandler))
+	router.Handle("POST /apps/{appID}", corsMiddleware(s.postAppsHandler))
 
 	s.server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", s.port),

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,10 +10,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/renantatsuo/app-review/server/internal/apps"
 	"github.com/renantatsuo/app-review/server/internal/config"
+	"github.com/renantatsuo/app-review/server/internal/db"
 	"github.com/renantatsuo/app-review/server/internal/reviews"
 	"github.com/renantatsuo/app-review/server/internal/server"
-	"github.com/renantatsuo/app-review/server/internal/store"
 	"github.com/renantatsuo/app-review/server/pkg/apple"
 )
 
@@ -25,27 +25,22 @@ const (
 func main() {
 	config, err := config.LoadConfigFromEnv()
 	if err != nil {
-		log.Fatalf("error loading config: %w", err)
+		slog.Error("error loading config", "error", err)
+		os.Exit(1)
 	}
 
 	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: config.LogLevel,
-	}))
+	})).With(slog.String("service", "server"))
 
 	l.Info("initializing server", "port", config.Port, "logLevel", config.LogLevel)
 
-	store := store.New()
 	appleClient := apple.New()
-	reviewsClient := reviews.New(l, store, appleClient, config.PollingInterval, config.ReviewsTimeLimit, config.StoreDir, config.AppIDs)
-	reviewsClient.Load()
+	db := db.Connect()
+	reviewsClient := reviews.New(l, appleClient, db, config)
+	appsClient := apps.New(db, appleClient)
 
-	ctx, cancel := context.WithCancel(context.Background())
-
-	go func() {
-		reviewsClient.StartPolling(ctx)
-	}()
-
-	s := server.New(config.Port, l, reviewsClient)
+	s := server.New(config.Port, l, reviewsClient, appsClient, config)
 
 	go func() {
 		if err := s.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -61,7 +56,7 @@ func main() {
 
 	l.Info("received shutdown signal, gracefully shutting down server")
 
-	cancel()
+	db.Close()
 
 	killCtx, killCancel := context.WithTimeout(context.Background(), serverShutdownTimeout)
 	defer killCancel()

@@ -8,21 +8,19 @@ import (
 )
 
 type Review struct {
-	ID      string       `json:"id"`
-	Author  ReviewAuthor `json:"author"`
-	Title   string       `json:"title"`
-	Content string       `json:"content"`
-	Rating  int          `json:"rating"`
-	Updated time.Time    `json:"updated"`
-}
-
-type ReviewAuthor struct {
-	Name string `json:"name"`
-	URI  string `json:"uri"`
+	ID        string    `json:"id"`
+	AppID     string    `json:"app_id"`
+	Author    string    `json:"author"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	Rating    int       `json:"rating"`
+	SentAt    time.Time `json:"sent_at"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }
 
 // ReviewFromAppleReview transforms the apple review to the models.Review.
-func ReviewFromAppleReview(review apple.Review) (Review, error) {
+func ReviewFromAppleReview(review apple.Review, appID string) (Review, error) {
 	rating, err := strconv.Atoi(review.Rating.Label)
 	if err != nil {
 		return Review{}, err
@@ -34,15 +32,13 @@ func ReviewFromAppleReview(review apple.Review) (Review, error) {
 	}
 
 	res := Review{
-		ID: review.ID.Label,
-		Author: ReviewAuthor{
-			Name: review.Author.Name.Label,
-			URI:  review.Author.Uri.Label,
-		},
+		ID:      review.ID.Label,
+		AppID:   appID,
+		Author:  review.Author.Name.Label,
 		Title:   review.Title.Label,
 		Content: review.Content.Label,
 		Rating:  rating,
-		Updated: updated,
+		SentAt:  updated,
 	}
 
 	return res, nil
