@@ -14,7 +14,7 @@ const (
 
 var ErrNoNextPage = fmt.Errorf("no next page")
 
-type Response[T any] struct {
+type ReviewsResponse[T any] struct {
 	Feed struct {
 		Entry []T          `json:"entry"`
 		Link  []ReviewLink `json:"link"`
@@ -62,18 +62,18 @@ func getAppleRSSURL(appID string) string {
 }
 
 // GetLatestReviews returns the latest reviews for a given app ID
-func (c *AppleClient) GetLatestReviews(appID string) (Response[Review], error) {
+func (c *AppleClient) GetLatestReviews(appID string) (ReviewsResponse[Review], error) {
 	url := getAppleRSSURL(appID)
 
 	response, err := c.httpClient.Get(url)
 	if err != nil {
-		return Response[Review]{}, err
+		return ReviewsResponse[Review]{}, err
 	}
 	defer response.Body.Close()
 
-	var reviewsResponse Response[Review]
+	var reviewsResponse ReviewsResponse[Review]
 	if err := json.NewDecoder(response.Body).Decode(&reviewsResponse); err != nil {
-		return Response[Review]{}, err
+		return ReviewsResponse[Review]{}, err
 	}
 
 	reviewsResponse.httpClient = c.httpClient
@@ -82,7 +82,7 @@ func (c *AppleClient) GetLatestReviews(appID string) (Response[Review], error) {
 }
 
 // HasNext returns true if there is a next page of reviews.
-func (r *Response[Review]) HasNext() bool {
+func (r *ReviewsResponse[Review]) HasNext() bool {
 	if len(r.Feed.Link) == 0 || len(r.Feed.Entry) == 0 {
 		return false
 	}
@@ -97,9 +97,9 @@ func (r *Response[Review]) HasNext() bool {
 }
 
 // Next returns the next page of reviews.
-func (r *Response[Review]) Next() (Response[Review], error) {
+func (r *ReviewsResponse[Review]) Next() (ReviewsResponse[Review], error) {
 	if !r.HasNext() {
-		return Response[Review]{}, ErrNoNextPage
+		return ReviewsResponse[Review]{}, ErrNoNextPage
 	}
 
 	var nextPageURL string
@@ -112,18 +112,18 @@ func (r *Response[Review]) Next() (Response[Review], error) {
 	}
 
 	if nextPageURL == "" {
-		return Response[Review]{}, ErrNoNextPage
+		return ReviewsResponse[Review]{}, ErrNoNextPage
 	}
 
 	response, err := r.httpClient.Get(nextPageURL)
 	if err != nil {
-		return Response[Review]{}, err
+		return ReviewsResponse[Review]{}, err
 	}
 	defer response.Body.Close()
 
-	var nextPageResponse Response[Review]
+	var nextPageResponse ReviewsResponse[Review]
 	if err := json.NewDecoder(response.Body).Decode(&nextPageResponse); err != nil {
-		return Response[Review]{}, err
+		return ReviewsResponse[Review]{}, err
 	}
 
 	nextPageResponse.httpClient = r.httpClient
