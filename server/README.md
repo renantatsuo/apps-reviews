@@ -182,6 +182,28 @@ Returns all currently monitored apps.
 }
 ```
 
+#### Get App Details
+
+```
+GET /apps/{appID}
+```
+
+Returns details for a specific app by its Apple App ID.
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "1458862350",
+    "name": "Hevy - Workout Tracker Gym Log",
+    "thumbnail_url": "https://...",
+    "created_at": "2024-01-01T12:00:00Z",
+    "updated_at": "2024-01-01T12:00:00Z"
+  }
+}
+```
+
 #### Add New App
 
 ```

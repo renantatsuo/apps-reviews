@@ -104,6 +104,24 @@ Fetch all monitored apps.
 }
 ```
 
+### GET /api/apps/{appID}
+
+Fetch a monitored apps.
+
+**Response:**
+
+```json
+{
+  "data": {
+    "id": "1458862350",
+    "name": "Hevy - Workout Tracker Gym Log",
+    "thumbnail_url": "https://...",
+    "created_at": "2024-01-01T12:00:00Z",
+    "updated_at": "2024-01-01T12:00:00Z"
+  }
+}
+```
+
 ### POST /api/apps/{appID}
 
 Add a new app to monitor by Apple App Store ID.

@@ -24,6 +24,22 @@ func (s *server) getAppsHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// getAppHandler is the handler for the /apps/:appID endpoint.
+func (s *server) getAppHandler(w http.ResponseWriter, r *http.Request) {
+	appID := r.PathValue("appID")
+	app, err := s.appsClient.GetAppData(appID)
+	if err != nil {
+		s.logger.Error("error getting app data", "error", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(ResponseData[models.App]{
+		Data: app,
+	})
+}
+
 // postAppsHandler is the handler for the /apps endpoint.
 // It creates a new app.
 func (s *server) postAppsHandler(w http.ResponseWriter, r *http.Request) {

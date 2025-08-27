@@ -42,6 +42,7 @@ func (s *server) Start() error {
 	router.Handle("GET /reviews/{appID}", corsMiddleware(s.getReviewsHandler))
 	router.Handle("GET /apps", corsMiddleware(s.getAppsHandler))
 	router.Handle("POST /apps/{appID}", corsMiddleware(s.postAppsHandler))
+	router.Handle("GET /apps/{appID}", corsMiddleware(s.getAppHandler))
 
 	s.server = &http.Server{
 		Addr:    fmt.Sprintf(":%d", s.port),
