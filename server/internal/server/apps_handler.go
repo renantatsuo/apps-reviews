@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/renantatsuo/app-review/server/internal/apps"
 	"github.com/renantatsuo/app-review/server/internal/models"
 )
 
@@ -53,6 +54,12 @@ func (s *server) postAppsHandler(w http.ResponseWriter, r *http.Request) {
 
 	app, err := s.appsClient.GetAppData(appID)
 	if err != nil {
+		if errors.As(err, &apps.ErrAppNotFound{}) {
+			s.logger.Error("app not found", "appID", appID)
+			http.Error(w, "app not found", http.StatusNotFound)
+			return
+		}
+
 		s.logger.Error("error getting app data", "error", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
