@@ -14,8 +14,9 @@ The application follows a clean, component-based architecture with clear separat
 
 ## Features
 
-- **App Search**: Search for apps using their Apple App Store ID
-- **Real-time Reviews**: Display recent reviews from the last 48 hours
+- **App Management**: Browse and select from monitored apps with thumbnails and names
+- **Add New Apps**: Add apps to monitor by Apple App Store ID through the web interface
+- **Real-time Reviews**: Display recent reviews from the last 48 hours for selected apps
 - **Rating Display**: Visual star ratings with numeric scores
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 - **Error Handling**: Graceful error states with retry functionality
@@ -50,6 +51,9 @@ The web client connects to the backend server through a proxy configuration:
 
 ### API Endpoints Used
 
+- `GET /api/apps` - Fetch all monitored apps
+- `GET /api/apps/{appID}` - Fetch details for a specific app
+- `POST /api/apps/{appID}` - Add a new app to monitor
 - `GET /api/reviews/{appID}` - Fetch reviews for a specific app
 
 ## Technology Stack
@@ -66,8 +70,10 @@ The web client connects to the backend server through a proxy configuration:
 
 1. **Start the Backend**: Ensure the Go server is running (see `../server/README.md`)
 2. **Start the Frontend**: Run `npm run dev` to start the web application
-3. **Search for Reviews**: Enter an Apple App Store ID (e.g., `1458862350` for WhatsApp)
-4. **View Results**: Browse through recent reviews with ratings and content
+3. **Browse Apps**: View all currently monitored apps with their thumbnails and names
+4. **Add New Apps**: Use the "Add New App" form to add apps by their Apple App Store ID (e.g., `1458862350`)
+5. **Select Apps**: Click on any app from the list to view its recent reviews
+6. **View Reviews**: Browse through recent reviews with ratings and content
 
 ## Configuration
 

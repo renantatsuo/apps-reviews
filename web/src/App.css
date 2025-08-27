@@ -23,28 +23,26 @@
   line-height: 1.5;
 }
 
-.search {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  max-width: 600px;
-  margin: 0 auto;
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.search h1 {
+.header h1 {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   background: linear-gradient(135deg, var(--apple-blue), var(--warning-color));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.search__form {
-  width: 100%;
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .input-group {
@@ -89,6 +87,7 @@
   border-radius: var(--border-radius);
   color: var(--text-secondary);
   font-size: 1.1rem;
+  border: 1px solid var(--border-color);
 }
 
 .reviews__list {
@@ -98,19 +97,114 @@
   margin-top: 2rem;
 }
 
+/* Apps List Styles */
+.apps-list {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+}
+
+@media (prefers-color-scheme: dark) {
+  .apps-list {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.apps-list__header {
+  margin-bottom: 20px;
+}
+
+.apps-list__header h2 {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.apps-list__subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.apps-list__loading {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.apps-list__error {
+  margin-bottom: 20px;
+}
+
+.apps-list__empty {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.apps-list__grid {
+  display: grid;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 24px;
+}
+
+.apps-list__add-app {
+  border-top: 1px solid var(--border-color);
+  padding-top: 24px;
+}
+
+.apps-list__add-app h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.add-app-form .input-group {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.add-app-form .input-group input {
+  flex: 1;
+}
+
+.add-app-form__error {
+  margin-top: 12px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .reviews-container {
     padding: 1rem;
   }
 
-  .search h1 {
+  .header h1 {
     font-size: 2rem;
   }
 
   .input-group {
     flex-direction: column;
     gap: 1rem;
+  }
+
+  /* Responsive adjustments for add app form */
+  .add-app-form .input-group {
+    flex-direction: column;
+  }
+
+  .add-app-form .input-group input,
+  .add-app-form .input-group button {
+    width: 100%;
   }
 
   .reviews__list {
@@ -124,7 +218,7 @@
     padding: 0.5rem;
   }
 
-  .search-section h1 {
+  .header h1 {
     font-size: 1.75rem;
   }
 }
@@ -134,10 +228,18 @@
   :root {
     --text-primary: #f5f5f7;
     --text-secondary: #86868b;
-    --bg-primary: #1d1d1f;
+    --bg-primary: #1c1c1e;
     --bg-secondary: #2c2c2e;
-    --border-color: #38383a;
+    --border-color: #48484a;
     --error-bg: #2d1b1b;
     --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  body {
+    background: #000;
+  }
+
+  .app {
+    background: #000;
   }
 }
