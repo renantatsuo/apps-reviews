@@ -1,17 +1,12 @@
 import * as HttpClient from "~/lib/http/typed-fetch";
 
-type ReviewAuthor = {
-  name: string;
-  uri: string;
-};
-
 type Review = {
   id: string;
-  author: ReviewAuthor;
+  author: string;
   title: string;
   content: string;
   rating: number;
-  updated: string; // ISO date string
+  sent_at: string;
 };
 
 type ReviewsResponse = {

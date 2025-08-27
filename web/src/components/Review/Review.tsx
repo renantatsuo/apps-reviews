@@ -27,7 +27,7 @@ export const Review = ({ review }: ReviewProps) => {
           <span className="review__stars">{renderStars(review.rating)}</span>
           <span className="review__rating-number">({review.rating}/5)</span>
         </div>
-        <div className="review__date">{formatDate(review.updated)}</div>
+        <div className="review__date">{formatDate(review.sent_at)}</div>
       </div>
 
       <h3 className="review__title">{review.title}</h3>
@@ -37,7 +37,9 @@ export const Review = ({ review }: ReviewProps) => {
       </div>
 
       <div className="review__author">
-        <span>by {review.author.name}</span>
+        <span>
+          by <b>{review.author}</b>
+        </span>
       </div>
     </div>
   );
