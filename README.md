@@ -7,20 +7,22 @@ A microservices-based system that continuously monitors the Apple App Store for 
 The system follows a **microservices architecture** with three main services that communicate through a persistent queue:
 
 ```mermaid
-graph TB
+flowchart TB
     App --> API[server api]
+    Apple -..- consumer
 
-    subgraph "server"
-        API --> DB[(Apps/Reviews Database)]
-        API --> DB
+    subgraph server
+      DB[(Apps/Reviews Database)]
+      queue@{ shape: das, label: "SQLite queue" }
 
-        scheduler --> queue[(SQLite queue)]
-        queue --> consumer
-        consumer --> Apple
-        consumer --> DB
+      API <--> DB
+      API --> queue
 
-        scheduler --> DB
-        Apple --> consumer
+      DB --> scheduler --> queue --> consumer --> DB
+    end
+
+    subgraph external
+      Apple
     end
 ```
 

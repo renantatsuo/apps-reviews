@@ -9,9 +9,9 @@ The backend follows a **microservices architecture** with three separate service
 ### Services Overview
 
 ```mermaid
-graph TB
+graph LR
     subgraph "Services"
-        Queue[(queue)]
+        Queue@{ shape: das, label: "SQLite queue" }
         Database[(database)]
         Consumer[consumer]
         Scheduler[scheduler]
@@ -29,7 +29,7 @@ graph TB
     Scheduler --> Queue
 
     Queue --> Consumer
-    Consumer <--> Apple
+    Consumer -.- Apple
     Consumer --> Database
 ```
 
